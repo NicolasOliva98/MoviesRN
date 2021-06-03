@@ -16,16 +16,17 @@ const RootStack = () => {
     useEffect(() => {
         const bootstrapAsync = async () => {
             let token = null;
+            let userData = null;
             try {
-                const user = await checkAuth();
-                const { jwtToken } = user;
+                const usuario = await checkAuth();
+                const { jwtToken, userCurrent } = usuario;
                 token = jwtToken;
+                userData = userCurrent
             } catch (e) {
                 console.log('error', e);
             }
-            dispatch({ type: 'RESTORE_TOKEN', token });
+            dispatch({ type: 'RESTORE_TOKEN', token, userData });
         };
-
         bootstrapAsync();
     }, [dispatch]);
 

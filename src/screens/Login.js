@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { TouchableOpacity, Alert } from 'react-native'
 import { Div as View, Text, Icon, Input, Button, Image } from 'react-native-magnus'
 import { rv, hp } from '../helpers/responsive'
@@ -20,11 +20,12 @@ const Login = ({ navigation }) => {
             setLoadLogin(true)
             const user = await signIn(username, password)
             console.log(user);
-            dispatch({ type: 'SIGN_IN', token: user.data.payload.token })
+            dispatch({ type: 'SIGN_IN', token: user.data.payload.token, userData: user.data.user })
             setLoadLogin(false)
             navigation.navigate('Home')
         } catch (error) {
             console.log(error);
+            Alert.alert('Error!','Usuario o contraseña incorrectas')
             setLoadLogin(false)
         }
     }
@@ -46,6 +47,7 @@ const Login = ({ navigation }) => {
                     autoCapitalize='none'
                     autoCorrect={false}
                     autoCompleteType='name'
+                    fontSize={rv(hp(2.7))}
                     onChangeText={text => setForm({ ...form, username: text })}
                     secureTextEntry={false}
                     prefix={<Icon name='user' fontFamily='Feather' color='white' fontSize={rv(hp(3))} />}
@@ -62,6 +64,7 @@ const Login = ({ navigation }) => {
                     secureTextEntry={ViewPass}
                     keyboardType='default'
                     value={form.password}
+                    fontSize={rv(hp(2.7))}
                     onChangeText={text => setForm({ ...form, password: text })}
                     prefix={<Icon name='lock' fontFamily='Feather' color='white' fontSize={rv(hp(3))} />}
                     suffix={

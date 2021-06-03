@@ -1,58 +1,168 @@
 import React, { useState, useEffect } from 'react'
-import { TouchableOpacity, FlatList, Alert } from 'react-native'
-import { Div as View, Text, Icon, Button } from 'react-native-magnus'
-import { rv, hp } from '../helpers/responsive'
+import { TouchableOpacity, Alert, ImageBackground, ScrollView, ActivityIndicator } from 'react-native'
+import { Div as View, Text } from 'react-native-magnus'
+import { rv, hp, wp } from '../helpers/responsive'
 import { Loading, Header } from '../components'
-import useFetch from '../hooks/useFetch'
-import * as SecureStore from 'expo-secure-store';
-import { signOut } from '../services/AuthServices';
-import { useAuthDispatch } from '../context/AuthContext';
-const Home = ({ navigation, route }) => {
-    const dispatch = useAuthDispatch()
-    /*  const _RenderItem = ({ item, index }) => {
-         return (
-             <View key={index}>
-                 <View row={true} alignItems='center' py={rv(hp(3))}>
-                     <TouchableOpacity onPress={() => navigation.navigate('Details', { id: item.codigo, title: item.nombre, type: item.unidad_medida })} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                         <View w={'85%'} ml={rv(hp(1.5))}>
-                             <Text fontSize={rv(hp(2.8))} my={3} fontWeight='bold' color='blue700'>{item.nombre}</Text>
-                             <Text fontSize={rv(hp(2.6))} my={3} fontWeight='400' >{item.unidad_medida}</Text>
-                         </View>
-                     </TouchableOpacity>
-                     <TouchableOpacity onPress={() => navigation.navigate('Week', { id: item.codigo, title: item.nombre, item: item, type: item.unidad_medida })}>
-                         <View row>
-                             <Icon name='info' fontFamily='Feather' fontSize={rv(hp(4))} color='blue600' />
-                             <Icon name='chevron-right' fontFamily='Feather' fontSize={rv(hp(4))} color='blue600' />
-                         </View>
-                     </TouchableOpacity>
-                 </View>
-                 <View h={1} bg='#ccc' />
-             </View>
-         )
-     } */
+import { useAuthState } from '../context/AuthContext';
+import Carousel from 'react-native-snap-carousel';
+import { FlatGrid } from 'react-native-super-grid';
+import axios from 'axios'
+const Home = ({ navigation }) => {
+    const state = useAuthState()
+    const [Movies, setMovies] = useState([])
+    const [Populars, setPopulars] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [loadMovies, setLoadMovies] = useState(false)
+    const [loadPopular, setLoadPopular] = useState(false)
+    const url = 'https://image.tmdb.org/t/p/w500'
 
-     const handleSignOut = async () => {
+    const [pagesMovies, setPagesMovies] = useState(1)
+    const [pagesPopulars, setPagesPopulars] = useState(1)
+
+
+    const getMovies = async () => {
         try {
-            await signOut();
-            dispatch({ type: 'SIGN_OUT' })
-            navigation.navigate('Login')
-        } catch (e) {
-            console.log(e);
-        }
-    };
+            setLoadMovies(true)
+            const movies = await axios.get('http://161.35.140.236:9005/api/movies/now_playing', {
+                params: { page: pagesMovies },
+                headers: {
+                    'Authorization': `Bearer ${state.userToken}`
+                },
+            })
+            setMovies(
+                pagesMovies === 1 ? Array.from(movies.data.data) :
+                [...Movies, ...movies.data.data]
+            )
 
-    return (/* loading ?
+            setLoadMovies(false)
+        } catch (error) {
+            console.log(error);
+            setLoadMovies(false)
+        }
+    }
+    const getPopulars = async () => {
+        try {
+            setLoadPopular(true)
+            const popular = await axios.get('http://161.35.140.236:9005/api/movies/popular', {
+                params: { page: pagesPopulars },
+                headers: {
+                    'Authorization': `Bearer ${state.userToken}`
+                },
+            })        
+            setPopulars(
+                pagesPopulars === 1 ? Array.from(popular.data.data) :
+                [...Populars, ...popular.data.data]
+            )
+            setLoadPopular(false)
+        } catch (error) {
+            console.log(error);
+            setLoadPopular(false)
+        }
+    }
+
+    const handleMoreMovies = () => {
+        setPagesMovies(pagesMovies + 1)
+        getMovies();
+    }
+    const handleMorePopulars = () => {
+        setPagesPopulars(pagesPopulars + 1)
+        getPopulars();
+    }
+
+    useEffect(() => {
+        setLoading(true)
+        getMovies()
+        getPopulars()
+        setLoading(false)
+        return () => {
+        }
+    }, [])
+
+    const _RenderItem = ({ item, index }) => {
+        return (
+            <View key={index}>
+                <View row={true} alignItems='center' py={rv(hp(3))}>
+                    <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('Details', { id: item.id, item: item, url: url })} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <ImageBackground
+                            borderRadius={20}
+                            source={{ uri: `${url}${item.backdrop_path}` }} style={{
+                                width: rv(wp(93)),
+                                height: rv(hp(30)),
+                                justifyContent: 'flex-end',
+                                alignItems: 'flex-end',
+                                padding: 15
+                            }}>
+                            <View shadow='2xl' shadowColor='black'>
+                                <Text color='white' fontWeight='900' fontSize={rv(hp(4))} numberOfLines={1}>{item.original_title}</Text>
+                            </View>
+                        </ImageBackground>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        )
+    }
+
+    const renderSelected = ({ item, index }) => {
+        return (
+            <View key={index}>
+                <TouchableOpacity activeOpacity={0.6} onPress={() => navigation.navigate('Details', { id: item.id, item: item, url: url })}>
+                    <ImageBackground
+                        borderRadius={10}
+                        source={{ uri: `${url}${item.backdrop_path}` }} style={{
+                            width: rv(wp(40)),
+                            height: rv(hp(13)),
+                            justifyContent: 'flex-end',
+                            alignItems: 'flex-end',
+                            padding: 5
+                        }}>
+                        <View shadow='2xl' shadowColor='black'>
+                            <Text color='white' fontWeight='900' fontSize={rv(hp(2.3))} numberOfLines={1}>{item.original_title}</Text>
+                        </View>
+                    </ImageBackground>
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+    return (loading ?
         <Loading />
-        : */
+        :
         <View flex={1} bg='black'>
-        <Header  /> 
-            <View flex={1} bg='gray800' px={rv(hp(3))}>
-                {/*  <FlatList
-                    data={Indicators}
-                    keyExtractor={item => item.codigo}
-                    renderItem={(item, index) => _RenderItem(item, index)}
-                /> */}
-                <Button onPress={() => handleSignOut()}>Cerrar sessión</Button>
+            <Header />
+            <View flex={1} bg='black' px={rv(hp(3))}>
+
+                <View>
+                    <Text color='white' fontSize={rv(hp(4.6))} fontWeight='bold'>Peliculas de estreno</Text>
+                    <Carousel
+                        data={Movies}
+                        renderItem={_RenderItem}
+                        keyExtractor={(item) => String(item.id)}
+                        sliderWidth={wp(100)}
+                        itemWidth={wp(100)}
+                        style={{
+                            backgroundColor: 'red'
+                        }}
+                        onEndReached={() => handleMoreMovies()}
+                        onEndReachedThreshold={0}
+                        ListFooterComponent={loadMovies ? <ActivityIndicator color='white' /> : null}
+                    />
+                </View>
+                <Text my={rv(hp(2))} color='white' fontSize={rv(hp(4.4))} fontWeight='600'>Peliculas más populares ⭐️</Text>
+                <FlatGrid
+                    style={{
+                        paddingTop: 10
+                    }}
+                    scrollEnabled={true}
+                    itemDimension={rv(hp(20))}
+                    data={Populars}
+                    spacing={rv(hp(2))}
+                    renderItem={(item, index) => renderSelected(item, index)}
+                    onEndReached={() => handleMorePopulars()}
+                    onEndReachedThreshold={0}
+                    ListFooterComponent={loadPopular ? <ActivityIndicator color='white' /> : null}
+                />
+                {/*     <Button onPress={() => handleSignOut()}>Cerrar sessión</Button> */}
+
             </View>
         </View>
 

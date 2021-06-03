@@ -25,10 +25,10 @@ const Home = ({ navigation }) => {
     const getMovies = async () => {
         try {
             setLoadMovies(true)
-            const { data } = await get(API.GET_MOVIES, { page: pagesMovies }, state.userToken)
+            const movies = await get(API.GET_MOVIES, { page: pagesMovies }, state.userToken)
             setMovies(
-                pagesMovies === 1 ? Array.from(data.data) :
-                    [...Movies, ...data.data]
+                pagesMovies === 1 ? Array.from(movies.data.data) :
+                    [...Movies, ...movies.data.data]
             )
             setLoadMovies(false)
         } catch (error) {
@@ -39,10 +39,10 @@ const Home = ({ navigation }) => {
     const getPopulars = async () => {
         try {
             setLoadPopular(true)
-            const { data } = await get(API.GET_POPULARS, { page: pagesMovies }, state.userToken)
+            const populars = await get(API.GET_POPULARS, { page: pagesPopulars }, state.userToken)
             setPopulars(
-                pagesPopulars === 1 ? Array.from(data.data) :
-                    [...Populars, ...data.data]
+                pagesPopulars === 1 ? Array.from(populars.data.data) :
+                    [...Populars, ...populars.data.data]
             )
             setLoadPopular(false)
         } catch (error) {

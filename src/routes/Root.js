@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { SafeAreaView, StatusBar } from 'react-native';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import LoginScreen from '../screens/Login'

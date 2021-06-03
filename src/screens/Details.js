@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { TouchableOpacity, FlatList, Alert, ActivityIndicator, ImageBackground, Image, ScrollView } from 'react-native'
-import { Div as View, Text, Icon } from 'react-native-magnus'
+import { FlatList, ImageBackground, Image, ScrollView } from 'react-native'
+import { Div as View, Text } from 'react-native-magnus'
 import { rv, hp, wp } from '../helpers/responsive'
 import { useAuthState } from '../context/AuthContext'
 import { Loading, Header } from '../components'
-import axios from 'axios'
+import useAxios from '../api/api'
 const Details = ({ navigation, route }) => {
+    const { get, URL } = useAxios()
     const { id, item, url } = route.params
     const state = useAuthState()
     const [repart, setRepart] = useState([])
@@ -14,19 +15,14 @@ const Details = ({ navigation, route }) => {
     const getRepart = async () => {
         try {
             setLoading(true)
-            const repart = await axios.get(`http://161.35.140.236:9005/api/movies/${id}/actors`, {
-                headers: {
-                    'Authorization': `Bearer ${state.userToken}`
-                },
-            })
-            setRepart(repart.data.data)
+            const { data } = await get(`${URL}/api/movies/${id}/actors`,{},state.userToken)
+            setRepart(data.data)
             setLoading(false)
         } catch (error) {
             console.log(error);
             setLoading(false)
         }
     }
-
     useEffect(() => {
         getRepart()
         return () => {

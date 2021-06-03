@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { TouchableOpacity, Alert, ImageBackground, ScrollView, ActivityIndicator } from 'react-native'
+import { TouchableOpacity, ImageBackground, ActivityIndicator } from 'react-native'
 import { Div as View, Text } from 'react-native-magnus'
 import { rv, hp, wp } from '../helpers/responsive'
 import { Loading, Header } from '../components'
 import { useAuthState } from '../context/AuthContext';
 import Carousel from 'react-native-snap-carousel';
 import { FlatGrid } from 'react-native-super-grid';
-import axios from 'axios'
+import useAxios from '../api/api'
+
 const Home = ({ navigation }) => {
     const state = useAuthState()
+    const { get, API } = useAxios()
     const [Movies, setMovies] = useState([])
     const [Populars, setPopulars] = useState([])
     const [loading, setLoading] = useState(false)
@@ -23,17 +25,11 @@ const Home = ({ navigation }) => {
     const getMovies = async () => {
         try {
             setLoadMovies(true)
-            const movies = await axios.get('http://161.35.140.236:9005/api/movies/now_playing', {
-                params: { page: pagesMovies },
-                headers: {
-                    'Authorization': `Bearer ${state.userToken}`
-                },
-            })
+            const { data } = await get(API.GET_MOVIES, { page: pagesMovies }, state.userToken)
             setMovies(
-                pagesMovies === 1 ? Array.from(movies.data.data) :
-                [...Movies, ...movies.data.data]
+                pagesMovies === 1 ? Array.from(data.data) :
+                    [...Movies, ...data.data]
             )
-
             setLoadMovies(false)
         } catch (error) {
             console.log(error);
@@ -43,15 +39,10 @@ const Home = ({ navigation }) => {
     const getPopulars = async () => {
         try {
             setLoadPopular(true)
-            const popular = await axios.get('http://161.35.140.236:9005/api/movies/popular', {
-                params: { page: pagesPopulars },
-                headers: {
-                    'Authorization': `Bearer ${state.userToken}`
-                },
-            })        
+            const { data } = await get(API.GET_POPULARS, { page: pagesMovies }, state.userToken)
             setPopulars(
-                pagesPopulars === 1 ? Array.from(popular.data.data) :
-                [...Populars, ...popular.data.data]
+                pagesPopulars === 1 ? Array.from(data.data) :
+                    [...Populars, ...data.data]
             )
             setLoadPopular(false)
         } catch (error) {

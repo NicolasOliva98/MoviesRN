@@ -21,7 +21,9 @@ const signOut = async () => {
   }
 };
 
-const checkAuth = async () => {
+
+//refresh token
+const checkAuth = async () => { 
   try {
     const usuario =  await SecureStore.getItemAsync('userdata')
     let currentuser = JSON.parse(usuario)

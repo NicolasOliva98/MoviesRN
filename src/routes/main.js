@@ -1,5 +1,5 @@
 import React from 'react'
-import { createStackNavigator, TransitionPresets, CardStyleInterpolators } from '@react-navigation/stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import HomeScren from '../screens/Home'
 import DetailsScreen from '../screens/Details'
 
